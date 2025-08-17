@@ -37,14 +37,21 @@ const App = () => {
     }
   }
 
-  const addPerson = (event) => {
+  const handleAddition = (event) => {
     event.preventDefault()
 
-    if (persons.find(person => person.name.toLowerCase() === newName.trim().toLowerCase())) {
-      alert(`${newName} is already added to the phonebook`)
-      return
-    }
+    const person = persons.find(p => p.name.toLowerCase() === newName.trim().toLowerCase())
 
+    if (!person) {
+      addPerson()
+    } else {
+      if(window.confirm(`${person.name} is already added to the phonebook, replace the old number with a new one`)) {
+        updatePerson(person)
+      }
+    }
+  }
+
+  const addPerson = () => {
     const personToAdd = {
       name: newName,
       number: newNumber
@@ -57,6 +64,17 @@ const App = () => {
 
         setNewName("")
         setNewNumber("")
+      })
+  }
+
+  const updatePerson = (person) => {
+    const changedPerson = {...person, number: newNumber}
+    personService
+      .updatePerson(person.id, changedPerson)
+      .then(returnedPerson => {
+        console.log("old person", person)
+        console.log("new person", returnedPerson)
+        setPersons(persons.map(p => p.id === returnedPerson.id ? returnedPerson : p))
       })
   }
 
@@ -82,7 +100,7 @@ const App = () => {
       <Filter search={search} onChange={handleSearchChange} />
       <h2>Add a new</h2>
       <PersonForm
-        onSubmit={addPerson}
+        onSubmit={handleAddition}
         newName={newName}
         newNumber={newNumber}
         handleNameChange={handleNameChange}
