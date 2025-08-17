@@ -5,6 +5,8 @@ import Persons from '../components/Persons'
 import PersonForm from '../components/PersonForm'
 import Filter from '../components/Filter'
 
+import personService from '../services/persons'
+
 const App = () => {
   // const [persons, setPersons] = useState([
   //   { name: 'Arto Hellas', number: '040-123456', id: 1 },
@@ -20,17 +22,25 @@ const App = () => {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then(response => {
-        setPersons(response.data)
-      })
-  })
+    personService
+      .getAll()
+      .then(initialPerson => setPersons(initialPerson))
+  }, [])
+
+  const handleDeletion = (p) => {
+    if (window.confirm(`Delete ${p.name} ?`)) {
+      personService
+        .deletePerson(p.id)
+        .then(deletedPerson => {
+          setPersons(persons.filter(p => p.id !== deletedPerson.id))
+        })
+    }
+  }
 
   const addPerson = (event) => {
     event.preventDefault()
 
-    if(persons.find(person => person.name.toLowerCase() === newName.trim().toLowerCase())) {
+    if (persons.find(person => person.name.toLowerCase() === newName.trim().toLowerCase())) {
       alert(`${newName} is already added to the phonebook`)
       return
     }
@@ -38,11 +48,16 @@ const App = () => {
     const personToAdd = {
       name: newName,
       number: newNumber
-    } 
-    setPersons(persons.concat(personToAdd))
+    }
 
-    setNewName("")
-    setNewNumber("")
+    personService
+      .addPerson(personToAdd)
+      .then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
+
+        setNewName("")
+        setNewNumber("")
+      })
   }
 
   const handleNameChange = (event) => {
@@ -74,7 +89,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} handleDeletion={handleDeletion} />
     </div>
   )
 }
