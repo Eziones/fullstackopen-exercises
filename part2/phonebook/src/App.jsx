@@ -4,6 +4,7 @@ import axios from 'axios'
 import Persons from '../components/Persons'
 import PersonForm from '../components/PersonForm'
 import Filter from '../components/Filter'
+import Notification from '../components/Notification'
 
 import personService from '../services/persons'
 
@@ -21,18 +22,27 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
 
+  const [message, setMessage] = useState(null)
+
   useEffect(() => {
     personService
       .getAll()
       .then(initialPerson => setPersons(initialPerson))
   }, [])
 
-  const handleDeletion = (p) => {
-    if (window.confirm(`Delete ${p.name} ?`)) {
+  const handleDeletion = (person) => {
+    if (window.confirm(`Delete ${person.name} ?`)) {
       personService
-        .deletePerson(p.id)
+        .deletePerson(person.id)
         .then(deletedPerson => {
           setPersons(persons.filter(p => p.id !== deletedPerson.id))
+        })
+        .catch(error => {
+          setMessage({message: `Informations of ${person.name} has already been removed from server`, type:'error'})
+          setPersons(persons.filter(p => p.id !== person.id))
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
         })
     }
   }
@@ -45,7 +55,7 @@ const App = () => {
     if (!person) {
       addPerson()
     } else {
-      if(window.confirm(`${person.name} is already added to the phonebook, replace the old number with a new one`)) {
+      if (window.confirm(`${person.name} is already added to the phonebook, replace the old number with a new one`)) {
         updatePerson(person)
       }
     }
@@ -62,18 +72,25 @@ const App = () => {
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson))
 
+        setMessage(`Added ${returnedPerson.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+
         setNewName("")
         setNewNumber("")
       })
   }
 
   const updatePerson = (person) => {
-    const changedPerson = {...person, number: newNumber}
+    const changedPerson = { ...person, number: newNumber }
     personService
       .updatePerson(person.id, changedPerson)
       .then(returnedPerson => {
-        console.log("old person", person)
-        console.log("new person", returnedPerson)
+        setMessage(`Updated ${returnedPerson.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
         setPersons(persons.map(p => p.id === returnedPerson.id ? returnedPerson : p))
       })
   }
@@ -97,6 +114,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter search={search} onChange={handleSearchChange} />
       <h2>Add a new</h2>
       <PersonForm
