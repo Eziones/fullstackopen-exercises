@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 
 import axios from 'axios'
+import Weather from './Weather'
 
 const CountryDetail = ({country}) => {
   const [weather, setWeather] = useState(null)
@@ -33,9 +34,7 @@ const CountryDetail = ({country}) => {
       </ul>
       <img src={country.flags['png']} alt={country.flags['alt']} />
       <h2>Weather in {country.capital}</h2>
-      <div>Temperature {weather.main.temp } Celsius</div>
-      <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} />
-      <div>wind {weather.wind.speed} m/s</div>
+      <Weather weather={weather} />
     </div>
   )
 }
