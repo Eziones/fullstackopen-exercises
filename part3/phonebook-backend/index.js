@@ -5,6 +5,8 @@ const app = express()
 morgan.token('persons', (req, res) =>  JSON.stringify(req.body))
 
 app.use(express.json())
+app.use(express.static('dist'))
+
 app.use(morgan('tiny', {
   skip: (req, res) => req.method === 'POST'
 }))
