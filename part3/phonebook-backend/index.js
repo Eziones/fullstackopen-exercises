@@ -66,9 +66,11 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
+  const person = persons.find(p => p.id === id)
+  
   persons = persons.filter(p => p.id !== id)
 
-  response.status(204).end()
+  response.status(200).json(person)
 })
 
 const generateId = () => {

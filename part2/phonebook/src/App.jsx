@@ -29,6 +29,7 @@ const App = () => {
       personService
         .deletePerson(person.id)
         .then(deletedPerson => {
+          console.log("deleted -> ", deletedPerson)
           setPersons(persons.filter(p => p.id !== deletedPerson.id))
         })
         .catch(error => {
