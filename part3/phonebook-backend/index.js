@@ -43,7 +43,6 @@ const Person = require('./models/person')
   ]
 */
 
-
 app.get('/api/info', (request, response) => {
 
   Person.countDocuments({}).then(result => {
