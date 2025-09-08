@@ -2,6 +2,7 @@ const express = require('express')
 const config = require('./utils/config')
 const mongoose = require('mongoose')
 const logger = require('./utils/logger')
+const middleware = require('./utils/middleware')
 const blogsRouter = require('./controllers/blogs')
 
 const app = express()
@@ -19,26 +20,10 @@ mongoose.connect(config.MONGODB_URI)
 
 app.use(express.static('dist'))
 app.use(express.json())
-// requestLogger
+// requestLogger to be added ?
 
 app.use('/api/blogs', blogsRouter)
-
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-app.use(unknownEndpoint)
-
-const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
-
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: "malformatted id" })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
-  }
-
-  next(error)
-}
-app.use(errorHandler)
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
 
 module.exports = app
